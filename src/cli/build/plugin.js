@@ -329,65 +329,76 @@ export async function createProcessor(args, cliConfigPath) {
   async function build() {
     let start = process.hrtime.bigint()
 
-    return readInput()
-      .then((css) => processor.process(css, { ...postcssOptions, from: input, to: output }))
-      .then((result) => {
-        if (!state.watcher) {
-          return result
-        }
-
-        env.DEBUG && console.time('Recording PostCSS dependencies')
-        for (let message of result.messages) {
-          if (message.type === 'dependency') {
-            state.contextDependencies.add(message.file)
+    return (
+      readInput()
+        .then((css) => processor.process(css, { ...postcssOptions, from: input, to: output }))
+        .then((result) => {
+          if (!state.watcher) {
+            return result
           }
-        }
-        env.DEBUG && console.timeEnd('Recording PostCSS dependencies')
 
-        // TODO: This needs to be in a different spot
-        env.DEBUG && console.time('Watch new files')
-        state.watcher.refreshWatchedFiles()
-        env.DEBUG && console.timeEnd('Watch new files')
-
-        return result
-      })
-      .then((result) => {
-        if (!output) {
-          process.stdout.write(result.css)
-          return
-        }
-
-        return Promise.all([
-          outputFile(result.opts.to, result.css),
-          result.map && outputFile(result.opts.to + '.map', result.map.toString()),
-        ])
-      })
-      .then(() => {
-        let end = process.hrtime.bigint()
-        console.error()
-        console.error('Done in', (end - start) / BigInt(1e6) + 'ms.')
-      })
-      .then(
-        () => {},
-        (err) => {
-          // TODO: If an initial build fails we can't easily pick up any PostCSS dependencies
-          // that were collected before the error occurred
-          // The result is not stored on the error so we have to store it externally
-          // and pull the messages off of it here somehow
-
-          // This results in a less than ideal DX because the watcher will not pick up
-          // changes to imported CSS if one of them caused an error during the initial build
-          // If you fix it and then save the main CSS file so there's no error
-          // The watcher will start watching the imported CSS files and will be
-          // resilient to future errors.
-
-          if (state.watcher) {
-            console.error(err)
-          } else {
-            return Promise.reject(err)
+          env.DEBUG && console.time('Recording PostCSS dependencies')
+          for (let message of result.messages) {
+            if (message.type === 'dependency') {
+              state.contextDependencies.add(message.file)
+            }
           }
-        }
-      )
+          env.DEBUG && console.timeEnd('Recording PostCSS dependencies')
+
+          // TODO: This needs to be in a different spot
+          env.DEBUG && console.time('Watch new files')
+          state.watcher.refreshWatchedFiles()
+          env.DEBUG && console.timeEnd('Watch new files')
+
+          // return result
+          const candidates = result.root.nodes
+            .map((node) => {
+              if ('candidate' in node.raws.tailwind) return node.raws.tailwind?.candidate || ''
+              return undefined
+            })
+            .filter(Boolean)
+
+          // process.stdout.write(candidates)
+          outputFile(output, candidates.join('\n'))
+        })
+        // .then((result) => {
+        //   if (!output) {`
+        //     process.stdout.write(result.css)
+        //     return
+        //   }
+
+        //   return Promise.all([
+        //     outputFile(result.opts.to, result.css),
+        //     result.map && outputFile(result.opts.to + '.map', result.map.toString()),
+        //   ])
+        // })
+        .then(() => {
+          let end = process.hrtime.bigint()
+          console.error()
+          console.error('Done in', (end - start) / BigInt(1e6) + 'ms.')
+        })
+        .then(
+          () => {},
+          (err) => {
+            // TODO: If an initial build fails we can't easily pick up any PostCSS dependencies
+            // that were collected before the error occurred
+            // The result is not stored on the error so we have to store it externally
+            // and pull the messages off of it here somehow
+
+            // This results in a less than ideal DX because the watcher will not pick up
+            // changes to imported CSS if one of them caused an error during the initial build
+            // If you fix it and then save the main CSS file so there's no error
+            // The watcher will start watching the imported CSS files and will be
+            // resilient to future errors.
+
+            if (state.watcher) {
+              console.error(err)
+            } else {
+              return Promise.reject(err)
+            }
+          }
+        )
+    )
   }
 
   /**
