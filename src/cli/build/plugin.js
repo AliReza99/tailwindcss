@@ -359,7 +359,7 @@ export async function createProcessor(args, cliConfigPath) {
             .filter(Boolean)
 
           // process.stdout.write(candidates)
-          outputFile(output, candidates.join('\n'))
+          return outputFile(output, candidates.join('\n'))
         })
         // .then((result) => {
         //   if (!output) {`
