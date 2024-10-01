@@ -1,17 +1,12 @@
 {
-  "name": "tailwindcss",
+  "name": "tailwindcss-candidates",
   "version": "3.4.13",
   "description": "A utility-first CSS framework for rapidly building custom user interfaces.",
   "license": "MIT",
   "main": "lib/index.js",
   "types": "types/index.d.ts",
-  "repository": "https://github.com/tailwindlabs/tailwindcss.git",
-  "bugs": "https://github.com/tailwindlabs/tailwindcss/issues",
-  "homepage": "https://tailwindcss.com",
-  "bin": {
-    "tailwind": "lib/cli.js",
-    "tailwindcss": "lib/cli.js"
-  },
+  "repository": "https://github.com/AliReza99/tailwindcss.git",
+  "bin": "lib/cli.js",
   "scripts": {
     "prebuild": "npm run generate && rimraf lib",
     "build": "swc src --out-dir lib --copy-files",
