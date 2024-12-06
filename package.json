@@ -5,8 +5,13 @@
   "license": "MIT",
   "main": "lib/index.js",
   "types": "types/index.d.ts",
-  "repository": "https://github.com/AliReza99/tailwindcss.git",
-  "bin": "lib/cli.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliReza99/tailwindcss.git"
+  },
+  "bin": {
+    "tailwindcss-candidates": "lib/cli.js"
+  },
   "scripts": {
     "prebuild": "npm run generate && rimraf lib",
     "build": "swc src --out-dir lib --copy-files",
