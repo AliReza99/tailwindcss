@@ -12,7 +12,7 @@ A fork of Tailwind CSS with added functionality to output all detected Tailwind 
 Use this fork just like Tailwind CSS. In addition to generating the final CSS output, it will also provide a list of all classname candidates it detected, which can be used for debugging or building a safelist.
 
 ```bash
-npx tailwindcss-candidates -i ./src/styles.css -o ./candidates.txt --content "./src/**/*.{html,js,jsx,ts,tsx}
+npx tailwindcss-candidates -i ./src/styles.css -o ./candidates.txt --content "./src/**/*.{html,js,jsx,ts,tsx}"
 ```
 
 Given an input CSS file, `src/styles.css`:
